@@ -14,7 +14,10 @@ func main() {
 	fmt.Println("1111111111111")
 	defer conn.Close()
 	client := hello_grpc.NewHelloGRPCClient(conn)
-	res, err := client.SayHi(context.Background(), &hello_grpc.Req{Message: "客户端"})
+	res, err := client.SayHi(context.Background(), &hello_grpc.Req{
+		Message: "张宏宇",
+		Age:     22,
+	})
 	if err != nil {
 		return
 	}

@@ -15,9 +15,21 @@ type server struct {
 func (s *server) SayHi(ctx context.Context, req *hello_grpc.Req) (res *hello_grpc.Res, err error) {
 
 	fmt.Println(req.GetMessage())
+	fmt.Println(req.GetAge())
 	return &hello_grpc.Res{
-		Message: "服务端返回的grpc的内容",
+		Message: "Success",
+		Age:     200,
 	}, nil
+}
+
+func (s *server) SayHi1(hi1Server hello_grpc.HelloGRPC_SayHi1Server) error {
+	return nil
+}
+func (s *server) SayHi2(req *hello_grpc.Req, hi2Server hello_grpc.HelloGRPC_SayHi2Server) error {
+	return nil
+}
+func (s *server) SayHi3(hello_grpc.HelloGRPC_SayHi3Server) error {
+	return nil
 }
 
 func main() {
