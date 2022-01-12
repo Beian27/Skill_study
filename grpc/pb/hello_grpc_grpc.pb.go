@@ -19,6 +19,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HelloGRPCClient interface {
 	SayHi(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
+	SayHi1(ctx context.Context, opts ...grpc.CallOption) (HelloGRPC_SayHi1Client, error)
+	SayHi2(ctx context.Context, in *Req, opts ...grpc.CallOption) (HelloGRPC_SayHi2Client, error)
+	SayHi3(ctx context.Context, opts ...grpc.CallOption) (HelloGRPC_SayHi3Client, error)
 }
 
 type helloGRPCClient struct {
@@ -38,11 +41,111 @@ func (c *helloGRPCClient) SayHi(ctx context.Context, in *Req, opts ...grpc.CallO
 	return out, nil
 }
 
+func (c *helloGRPCClient) SayHi1(ctx context.Context, opts ...grpc.CallOption) (HelloGRPC_SayHi1Client, error) {
+	stream, err := c.cc.NewStream(ctx, &HelloGRPC_ServiceDesc.Streams[0], "/hello_grpc.HelloGRPC/SayHi1", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &helloGRPCSayHi1Client{stream}
+	return x, nil
+}
+
+type HelloGRPC_SayHi1Client interface {
+	Send(*Req) error
+	CloseAndRecv() (*Res, error)
+	grpc.ClientStream
+}
+
+type helloGRPCSayHi1Client struct {
+	grpc.ClientStream
+}
+
+func (x *helloGRPCSayHi1Client) Send(m *Req) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *helloGRPCSayHi1Client) CloseAndRecv() (*Res, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Res)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *helloGRPCClient) SayHi2(ctx context.Context, in *Req, opts ...grpc.CallOption) (HelloGRPC_SayHi2Client, error) {
+	stream, err := c.cc.NewStream(ctx, &HelloGRPC_ServiceDesc.Streams[1], "/hello_grpc.HelloGRPC/SayHi2", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &helloGRPCSayHi2Client{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type HelloGRPC_SayHi2Client interface {
+	Recv() (*Res, error)
+	grpc.ClientStream
+}
+
+type helloGRPCSayHi2Client struct {
+	grpc.ClientStream
+}
+
+func (x *helloGRPCSayHi2Client) Recv() (*Res, error) {
+	m := new(Res)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *helloGRPCClient) SayHi3(ctx context.Context, opts ...grpc.CallOption) (HelloGRPC_SayHi3Client, error) {
+	stream, err := c.cc.NewStream(ctx, &HelloGRPC_ServiceDesc.Streams[2], "/hello_grpc.HelloGRPC/SayHi3", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &helloGRPCSayHi3Client{stream}
+	return x, nil
+}
+
+type HelloGRPC_SayHi3Client interface {
+	Send(*Req) error
+	Recv() (*Res, error)
+	grpc.ClientStream
+}
+
+type helloGRPCSayHi3Client struct {
+	grpc.ClientStream
+}
+
+func (x *helloGRPCSayHi3Client) Send(m *Req) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *helloGRPCSayHi3Client) Recv() (*Res, error) {
+	m := new(Res)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // HelloGRPCServer is the server API for HelloGRPC service.
 // All implementations must embed UnimplementedHelloGRPCServer
 // for forward compatibility
 type HelloGRPCServer interface {
 	SayHi(context.Context, *Req) (*Res, error)
+	SayHi1(HelloGRPC_SayHi1Server) error
+	SayHi2(*Req, HelloGRPC_SayHi2Server) error
+	SayHi3(HelloGRPC_SayHi3Server) error
 	mustEmbedUnimplementedHelloGRPCServer()
 }
 
@@ -52,6 +155,15 @@ type UnimplementedHelloGRPCServer struct {
 
 func (UnimplementedHelloGRPCServer) SayHi(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHi not implemented")
+}
+func (UnimplementedHelloGRPCServer) SayHi1(HelloGRPC_SayHi1Server) error {
+	return status.Errorf(codes.Unimplemented, "method SayHi1 not implemented")
+}
+func (UnimplementedHelloGRPCServer) SayHi2(*Req, HelloGRPC_SayHi2Server) error {
+	return status.Errorf(codes.Unimplemented, "method SayHi2 not implemented")
+}
+func (UnimplementedHelloGRPCServer) SayHi3(HelloGRPC_SayHi3Server) error {
+	return status.Errorf(codes.Unimplemented, "method SayHi3 not implemented")
 }
 func (UnimplementedHelloGRPCServer) mustEmbedUnimplementedHelloGRPCServer() {}
 
@@ -84,6 +196,79 @@ func _HelloGRPC_SayHi_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HelloGRPC_SayHi1_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(HelloGRPCServer).SayHi1(&helloGRPCSayHi1Server{stream})
+}
+
+type HelloGRPC_SayHi1Server interface {
+	SendAndClose(*Res) error
+	Recv() (*Req, error)
+	grpc.ServerStream
+}
+
+type helloGRPCSayHi1Server struct {
+	grpc.ServerStream
+}
+
+func (x *helloGRPCSayHi1Server) SendAndClose(m *Res) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *helloGRPCSayHi1Server) Recv() (*Req, error) {
+	m := new(Req)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _HelloGRPC_SayHi2_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Req)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(HelloGRPCServer).SayHi2(m, &helloGRPCSayHi2Server{stream})
+}
+
+type HelloGRPC_SayHi2Server interface {
+	Send(*Res) error
+	grpc.ServerStream
+}
+
+type helloGRPCSayHi2Server struct {
+	grpc.ServerStream
+}
+
+func (x *helloGRPCSayHi2Server) Send(m *Res) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _HelloGRPC_SayHi3_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(HelloGRPCServer).SayHi3(&helloGRPCSayHi3Server{stream})
+}
+
+type HelloGRPC_SayHi3Server interface {
+	Send(*Res) error
+	Recv() (*Req, error)
+	grpc.ServerStream
+}
+
+type helloGRPCSayHi3Server struct {
+	grpc.ServerStream
+}
+
+func (x *helloGRPCSayHi3Server) Send(m *Res) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *helloGRPCSayHi3Server) Recv() (*Req, error) {
+	m := new(Req)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // HelloGRPC_ServiceDesc is the grpc.ServiceDesc for HelloGRPC service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +281,23 @@ var HelloGRPC_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _HelloGRPC_SayHi_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SayHi1",
+			Handler:       _HelloGRPC_SayHi1_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "SayHi2",
+			Handler:       _HelloGRPC_SayHi2_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SayHi3",
+			Handler:       _HelloGRPC_SayHi3_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "hello_grpc.proto",
 }

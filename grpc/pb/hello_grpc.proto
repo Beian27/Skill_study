@@ -4,14 +4,35 @@ option go_package="./;hello_grpc";
 
 package hello_grpc;
 
+//message Person {
+//    string name = 1;
+//    int32 age = 2;
+//    enum SEX{
+//        MAN = 0;
+//        WOMAN = 1;
+//        OTHER = 2;
+//    }
+//
+//    SEX sex = 3;
+//
+//    repeated string test = 4;
+//    map < string, string > test_map = 5;
+//}
+
+
 message Req {
     string message = 1;
+    int32 age = 2;
 }
 
 message Res {
     string message = 1;
+    int32 age = 2;
 }
 
 service HelloGRPC{
     rpc SayHi(Req) returns (Res);
+    rpc SayHi1(stream Req) returns (Res);
+    rpc SayHi2(Req) returns (stream Res);
+    rpc SayHi3(stream Req) returns (stream Res);
 }
